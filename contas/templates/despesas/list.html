@@ -1,0 +1,113 @@
+{%extends 'base.html'%}
+{%block 'titulo'%}DESPESAS{%endblock%}
+{%block 'conteudo'%}
+<div class="container">
+    <form method="post">
+        {% csrf_token %}
+        <div class="col-md-8 mx-auto align-items-center">
+            <div class="card box2 shadow-sm">
+                <div class="mx-auto d-flex align-items-center justify-content-between p-md-5 p-4">
+                    <span class="h5 fw-bold m-0">Adicionar despesas</span>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <div class="d-flex flex-column px-md-5 px-4 mb-4">
+                            <label for="{{ form.titulo.id_for_label }}">Titulo da Despesa</label>
+                            <div class="inputWithIcon">
+                                <input class="form-control" type="text" id="{{ form.titulo.id_for_label }}"
+                                    name="{{ form.titulo.name }}">
+                            </div>
+                        </div>
+                        <div class="d-flex flex-column px-md-5 px-4 mb-4">
+                            <label for="{{ form.valor.id_for_label }}">Valor da Despesa</label>
+                            <div class="inputWithIcon">
+                                <input class="form-control" type="number" id="{{ form.valor.id_for_label }}"
+                                    name="{{ form.valor.name }}">
+                            </div>
+                        </div>
+                        <div class="d-flex flex-column px-md-5 px-4 mb-4">
+                            <label for="{{ form.descricao.id_for_label }}">Descrição da Despesa</label>
+                            <div class="inputWithIcon">
+                                <input class="form-control" type="text" id="{{ form.descricao.id_for_label }}"
+                                    name="{{ form.descricao.name }}">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-5 col-12 px-md-5 px-4 mt-3">
+                        <button class="btn btn-primary w-100" type="submit">Adicionar Despesas</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+    <div class="container px-2">
+        <div class="table-responsive">
+            <table class="table table-responsive table-borderless">
+                <thead>
+                    <tr class="bg-light">
+                        <th scope="col" width="5%">#</th>
+                        <th scope="col" width="20%">Data</th>
+                        <th scope="col" width="10%">Titulo</th>
+                        <th scope="col" width="20%">Descrição</th>
+                        <th scope="col" class="text-end" width="20%"><span>Valor</span></th>
+                        <th scope="col" width="20%">Apagar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for despesa in despesas %}
+                    <tr>
+                        <td>{{despesa.id}}</td>
+                        <td>{{despesa.data}}</td>
+                        <td>{{despesa.titulo}}</td>
+                        <td><i class="fa fa-check-circle-o green"></i><span class="ms-1">{{despesa.descricao}}</span>
+                        </td>
+                        <td class="text-end"><span class="fw-bolder">{{despesa.valor}}</span> <i
+                                class="fa fa-ellipsis-h  ms-2"></i>
+                        </td>
+                        <td><a href="{% url 'delete-despesas' despesa.pk %}" class="btn btn-danger btn-sm delete-btn"
+                                data-despesa="{{ despesa.descricao }} " data-id="{{ despesa.pk }}">Apagar</a></td>
+                    </tr>
+
+                    {%endfor%}
+                </tbody>
+            </table>
+        </div>
+        <div class="px-5 mx-auto row mt-4 ">
+            <h3 class="text-justify">Total de Despesas: R$ {{ total_despesas }}</h3>
+        </div>
+    </div>
+    <div class="row col-md-6 mx-auto">
+        <button class="btn btn-primary"><a class="text-center text-a" href="{%url 'relatorio-despesas'%}">Gerar
+                relatorio</a></button>
+    </div>
+
+</div>
+<script>
+    const deleteButtons = document.querySelectorAll('.delete-btn');
+
+    deleteButtons.forEach(button => {
+        button.addEventListener('click', function (event) {
+            event.preventDefault();
+            const despesaDescricao = this.getAttribute('data-despesa');
+            const despesaId = this.getAttribute('data-id');
+            const confirmDelete = confirm(`Tem certeza que deseja excluir a despesa "${despesaDescricao}"?`);
+
+            if (confirmDelete) {
+                // Enviar solicitação de exclusão via AJAX
+                fetch(`/delete/${despesaId}/`, {
+                    method: 'DELETE',
+                    headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Atualizar a lista após a exclusão
+                            location.reload();
+                        }
+                    });
+            }
+        });
+    });
+</script>
+{%endblock%}

@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block 'conteudo' %}
+  <h2>Confirmação de Exclusão</h2>
+  <p>Tem certeza que deseja excluir a despesa "{{ object.descricao }}"?</p>
+  
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Confirmar Exclusão</button>
+    <a href="{% url 'lista_despesas' %}" class="btn btn-secondary">Cancelar</a>
+  </form>
+{% endblock %}
